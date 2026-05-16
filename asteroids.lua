@@ -28,6 +28,19 @@ local gameState = {
   }
 }
 
+-- Manual table insert (EdgeTX doesn't have table library)
+local function tableInsert(tbl, value)
+  tbl[#tbl + 1] = value
+end
+
+-- Manual table remove (EdgeTX doesn't have table library)
+local function tableRemove(tbl, index)
+  for i = index, #tbl - 1 do
+    tbl[i] = tbl[i + 1]
+  end
+  tbl[#tbl] = nil
+end
+
 -- Initialize asteroids
 local function initAsteroids(count)
   gameState.asteroids = {}
@@ -40,7 +53,7 @@ local function initAsteroids(count)
     x = math.max(10, math.min(SCREEN_W - 10, x))
     y = math.max(10, math.min(SCREEN_H - 10, y))
     
-    table.insert(gameState.asteroids, {
+    tableInsert(gameState.asteroids, {
       x = x,
       y = y,
       vx = (math.random() - 0.5) * 1.5,
@@ -108,7 +121,7 @@ local function updateShip(scrollWheel, steeringWheel, throttle)
       vy = ship.vy + math.sin(ship.angle) * 4,
       life = 60
     }
-    table.insert(gameState.bullets, bullet)
+    tableInsert(gameState.bullets, bullet)
   end
 end
 
@@ -123,7 +136,7 @@ local function updateBullets()
     
     -- Remove if off-screen or expired
     if bullet.life <= 0 or bullet.x < 0 or bullet.x > SCREEN_W or bullet.y < 0 or bullet.y > SCREEN_H then
-      table.remove(bullets, i)
+      tableRemove(bullets, i)
     end
   end
 end
@@ -156,13 +169,13 @@ local function checkBulletCollisions()
       if dist < asteroid.radius then
         -- Hit!
         gameState.score = gameState.score + (4 - asteroid.size) * 10
-        table.remove(gameState.bullets, b)
-        table.remove(gameState.asteroids, a)
+        tableRemove(gameState.bullets, b)
+        tableRemove(gameState.asteroids, a)
         
         -- Split asteroid
         if asteroid.size > 1 then
           for _ = 1, 2 do
-            table.insert(gameState.asteroids, {
+            tableInsert(gameState.asteroids, {
               x = asteroid.x,
               y = asteroid.y,
               vx = asteroid.vx + (math.random() - 0.5) * 2,
